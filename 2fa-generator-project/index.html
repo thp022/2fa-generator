@@ -48,7 +48,14 @@
             <div class="form-group">
                 <label for="secretInput">Base32 Secret Key / Secret URI</label>
                 <div class="input-wrapper">
-                    <input type="text" id="secretInput" placeholder="JBSWY3DPEHPK3PXP..." autocomplete="off" spellcheck="false" aria-label="Secret Key Input">
+                    <!-- 1. Auto-focus যুক্ত করা হয়েছে -->
+                    <input type="text" id="secretInput" placeholder="JBSWY3DPEHPK3PXP..." autocomplete="off" spellcheck="false" aria-label="Secret Key Input" autofocus>
+                    
+                    <!-- 2. Paste Button যুক্ত করা হয়েছে -->
+                    <button id="pasteBtn" class="action-btn" type="button" title="Paste from Clipboard">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                    </button>
+
                     <button id="scanBtn" class="action-btn" title="Scan QR Code">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10M12 7v10"/></svg>
                     </button>
@@ -88,6 +95,9 @@
             </div>
         </div>
     </div>
+
+    <!-- 3. Toast Notification Element যুক্ত করা হয়েছে -->
+    <div id="toast" class="toast hidden">Copied to Clipboard! 🚀</div>
 
     <footer class="app-footer">
         <div class="footer-container">
