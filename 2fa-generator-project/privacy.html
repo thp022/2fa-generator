@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Simple 2FA Generator</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="dark-theme">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>2FA Shield</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="privacy.html" class="active">Privacy</a>
+                <button id="themeToggle" class="theme-btn" aria-label="Toggle Theme">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="1" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="glass-card text-card">
+            <h1>Privacy Policy</h1>
+            <p>Your absolute security and explicit privacy form the design limits of our architecture. No configurations are compromised to collect insights.</p>
+            
+            <h2>Data Processing & Zero-Transmission Guarantee</h2>
+            <ul>
+                <li><strong>No Networks:</strong> Your Base32 keys never leave device sandboxed execution space.</li>
+                <li><strong>No Analytics:</strong> There are no tracking tools, telemetry layers, error beacons, or metrics collection systems embedded.</li>
+                <li><strong>No Persistence:</strong> We explicitly refuse the inclusion of Cookies, LocalStorage, or SessionStorage tracking tokens. Everything vanishes on tab closure.</li>
+            </ul>
+
+            <h2>Camera Stream Isolation</h2>
+            <p>The visual QR engine stream operates strictly via local canvas pixel analysis loops. Frames are processed entirely locally and instantly discarded after extracting valid cryptographic configuration structures.</p>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 2FA Shield. Open Source under MIT License. 100% Client-Side Operation.</p>
+        </div>
+    </footer>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

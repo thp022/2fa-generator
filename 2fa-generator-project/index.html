@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple 2FA Generator - Premium & Secure Client-Side TOTP Authenticator</title>
+    <meta name="description" content="A secure, 100% client-side 2FA TOTP token generator with zero tracking, zero server calls, and premium glassmorphism design. Scan QR codes or paste keys safely.">
+    <meta name="theme-color" content="#0f172a">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Simple 2FA Generator - Secure Client-Side TOTP">
+    <meta property="og:description" content="Generate 2FA codes completely inside your browser. No data ever leaves your device. Built with premium design and offline capability.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Simple 2FA Generator - Secure Client-Side TOTP">
+    <meta property="twitter:description" content="Generate 2FA codes completely inside your browser. No data ever leaves your device. Built with premium design and offline capability.">
+
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="dark-theme">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>2FA Shield</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="active">Home</a>
+                <a href="about.html">About</a>
+                <a href="privacy.html">Privacy</a>
+                <button id="themeToggle" class="theme-btn" aria-label="Toggle Theme">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="1" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="glass-card main-card">
+            <header class="card-header">
+                <h1>Simple 2FA Generator</h1>
+                <p>Secure, ultra-fast client-side TOTP token engine. Zero data collection.</p>
+            </header>
+
+            <div class="form-group">
+                <label for="secretInput">Base32 Secret Key / Secret URI</label>
+                <div class="input-wrapper">
+                    <input type="text" id="secretInput" placeholder="JBSWY3DPEHPK3PXP..." autocomplete="off" spellcheck="false" aria-label="Secret Key Input">
+                    <button id="scanBtn" class="action-btn" title="Scan QR Code">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10M12 7v10"/></svg>
+                    </button>
+                </div>
+                <p id="metaDisplay" class="meta-info"></p>
+            </div>
+
+            <div id="otpDisplaySection" class="otp-section hidden">
+                <div class="token-container">
+                    <div id="otpDigits" class="otp-digits">000 000</div>
+                    <button id="copyBtn" class="copy-btn" title="Copy Token">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span id="copyTooltip">Copy</span>
+                    </button>
+                </div>
+                
+                <div class="timer-container">
+                    <div class="progress-bar-bg">
+                        <div id="progressBar" class="progress-bar-fill"></div>
+                    </div>
+                    <div class="timer-text">Refreshes in <span id="timerCountdown">30</span>s</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scanner Modal Boundary -->
+    <div id="scannerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-backdrop"></div>
+        <div class="glass-card modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Scan 2FA QR Code</h2>
+                <button id="closeScannerBtn" class="close-btn" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="scanner-body">
+                <div id="qrReader"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 2FA Shield. Open Source under MIT License. 100% Client-Side Operation.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.1.4/otpauth.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="assets/js/qr.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
