@@ -14,6 +14,40 @@ document.addEventListener('DOMContentLoaded', () => {
     let totpInstance = null;
     let refreshInterval = null;
 
+    // অডিও নোটিফিকেশন জেনারেটর (Web Audio API)
+    function playNotificationSound(type = 'success') {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+
+            const audioCtx = new AudioContext();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sine';
+
+            if (type === 'copy') {
+                // কপি করার জন্য কিছুটা হাই-পিচ সাউন্ড
+                oscillator.frequency.setValueAtTime(900, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                oscillator.stop(audioCtx.currentTime + 0.12);
+            } else {
+                // কোড জেনারেট ও পেস্টের জন্য সাউন্ড
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                oscillator.stop(audioCtx.currentTime + 0.15);
+            }
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+        } catch (e) {
+            // ব্রাউজারে অডিও ব্লক থাকলে নীরব থাকবে
+        }
+    }
+
     // ১. অটো ফোকাস সাপোর্ট
     if (secretInput) {
         secretInput.focus();
@@ -29,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000);
     }
 
-    // ২. পেস্ট বাটন লজিক (নিরাপদ ও নির্ভরযোগ্য)
+    // ২. পেস্ট বাটন লজিক (অডিওসহ)
     if (pasteBtn && secretInput) {
         pasteBtn.addEventListener('click', async () => {
             try {
@@ -39,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         secretInput.value = text;
                         secretInput.dispatchEvent(new Event('input', { bubbles: true }));
                         showToast("Pasted from Clipboard! 📋");
+                        playNotificationSound('success');
                         return;
                     }
                 }
@@ -51,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         secretInput.value = text;
                         secretInput.dispatchEvent(new Event('input', { bubbles: true }));
                         showToast("Pasted from Clipboard! 📋");
+                        playNotificationSound('success');
                     } else {
                         showToast("Clipboard is empty!");
                     }
@@ -107,6 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             startTokenEngineLoop();
+            
+            // প্রথমবার সফলভাবে কোড দেখানোর সময় সাউন্ড প্লে হবে
+            if (otpDisplaySection.classList.contains('hidden')) {
+                playNotificationSound('success');
+            }
+            
             otpDisplaySection.classList.remove('hidden');
 
         } catch (error) {
@@ -156,13 +198,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ৩. কপি করার জন্য Toast Notification
+    // ৩. কপি করার জন্য Toast Notification & Sound
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
             const pureToken = otpDigits.textContent.replace(/\s+/g, '');
             navigator.clipboard.writeText(pureToken).then(() => {
                 if (copyTooltip) copyTooltip.textContent = "Copied!";
                 showToast("Copied to Clipboard! 🚀");
+                playNotificationSound('copy');
                 setTimeout(() => { if (copyTooltip) copyTooltip.textContent = "Copy"; }, 2000);
             }).catch(() => {
                 const fallbackArea = document.createElement('textarea');
@@ -173,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.removeChild(fallbackArea);
                 if (copyTooltip) copyTooltip.textContent = "Copied!";
                 showToast("Copied to Clipboard! 🚀");
+                playNotificationSound('copy');
                 setTimeout(() => { if (copyTooltip) copyTooltip.textContent = "Copy"; }, 2000);
             });
         });
