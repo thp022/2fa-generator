@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
     const secretInput = document.getElementById('secretInput');
-    secretInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/\s+/g, '').toUpperCase();
-});
     const otpDisplaySection = document.getElementById('otpDisplaySection');
     const otpDigits = document.getElementById('otpDigits');
     const copyBtn = document.getElementById('copyBtn');
@@ -30,20 +27,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function processInputUpdate(value) {
-        const cleanedValue = value.trim();
         metaDisplay.textContent = "";
 
-        if (!cleanedValue) {
+        if (!value || !value.trim()) {
             clearInterval(refreshInterval);
             otpDisplaySection.classList.add('hidden');
             return;
         }
 
         try {
-            let secret = cleanedValue;
+            let secret = value.trim();
 
-            if (cleanedValue.toLowerCase().startsWith('otpauth://')) {
-                const parsedUri = OTPAuth.URI.parse(cleanedValue);
+            // যদি otpauth:// দিয়ে শুরু না হয়, তবে স্পেস মুছে ফেলবে এবং Uppercase করবে
+            if (!secret.toLowerCase().startsWith('otpauth://')) {
+                secret = secret.replace(/\s+/g, '').toUpperCase();
+            } else {
+                const parsedUri = OTPAuth.URI.parse(secret);
                 secret = parsedUri.secret;
                 
                 if (parsedUri.issuer || parsedUri.label) {
@@ -95,7 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (secretInput) {
-        secretInput.addEventListener('input', (e) => processInputUpdate(e.target.value));
+        secretInput.addEventListener('input', (e) => {
+            let originalValue = e.target.value;
+            
+            // ইনপুট বক্সে যদি সাধারণ সিক্রেট কী দেওয়া হয়, ইনপুট ফিল্ড থেকেও সাথে সাথে স্পেস গায়েব হবে
+            if (!originalValue.toLowerCase().startsWith('otpauth://')) {
+                let cleanedInput = originalValue.replace(/\s+/g, '').toUpperCase();
+                if (originalValue !== cleanedInput) {
+                    e.target.value = cleanedInput;
+                }
+            }
+            
+            processInputUpdate(e.target.value);
+        });
     }
 
     if (copyBtn) {
