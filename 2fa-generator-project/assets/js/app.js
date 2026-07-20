@@ -10,13 +10,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progressBar');
     const timerCountdown = document.getElementById('timerCountdown');
     const metaDisplay = document.getElementById('metaDisplay');
+    const errorMessage = document.getElementById('errorMessage');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const pauseIcon = document.getElementById('pauseIcon');
 
     let totpInstance = null;
     let refreshInterval = null;
+    let isPaused = false;
 
     // ১. অটো ফোকাস সাপোর্ট
     if (secretInput) {
         secretInput.focus();
+    }
+
+    // Base32 সিক্রেট কী ভ্যালিডেশন চেকার (A-Z এবং 2-7 অনুমোদিত)
+    function isValidBase32(secret) {
+        const base32Regex = /^[A-Z2-7]+=*$/i;
+        return base32Regex.test(secret);
     }
 
     // টোস্ট নোটিফিকেশন প্রদর্শন
@@ -61,6 +71,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ৩. Pause/Resume Button Logic
+    if (pauseBtn) {
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            if (isPaused) {
+                if (pauseIcon) pauseIcon.textContent = "▶";
+                showToast("Timer Paused ⏸");
+            } else {
+                if (pauseIcon) pauseIcon.textContent = "⏸";
+                showToast("Timer Resumed ▶");
+                updateTokenDisplayCycle();
+            }
+        });
+    }
+
     const systemDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (!systemDarkTheme) {
         document.body.classList.remove('dark-theme');
@@ -77,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function processInputUpdate(value) {
         metaDisplay.textContent = "";
+        if (errorMessage) errorMessage.classList.add('hidden');
 
         if (!value || !value.trim()) {
             clearInterval(refreshInterval);
@@ -89,6 +115,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!secret.toLowerCase().startsWith('otpauth://')) {
                 secret = secret.replace(/\s+/g, '').toUpperCase();
+                
+                // Base32 ক্যারেক্টার না হলে লাল ওয়ার্নিং দেখাবে
+                if (!isValidBase32(secret)) {
+                    if (errorMessage) errorMessage.classList.remove('hidden');
+                    otpDisplaySection.classList.add('hidden');
+                    clearInterval(refreshInterval);
+                    return;
+                }
             } else {
                 const parsedUri = OTPAuth.URI.parse(secret);
                 secret = parsedUri.secret;
@@ -117,12 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startTokenEngineLoop() {
         clearInterval(refreshInterval);
+        isPaused = false;
+        if (pauseIcon) pauseIcon.textContent = "⏸";
         updateTokenDisplayCycle();
         refreshInterval = setInterval(updateTokenDisplayCycle, 1000);
     }
 
     function updateTokenDisplayCycle() {
-        if (!totpInstance) return;
+        if (!totpInstance || isPaused) return;
 
         try {
             const token = totpInstance.generate();
@@ -156,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ৩. কপি করার জন্য Toast Notification
+    // ৪. কপি বাটন লজিক
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
             const pureToken = otpDigits.textContent.replace(/\s+/g, '');
