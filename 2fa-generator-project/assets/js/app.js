@@ -13,42 +13,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let totpInstance = null;
     let refreshInterval = null;
+    let audioCtx = null;
 
-    // অডিও নোটিফিকেশন জেনারেটর (Web Audio API)
+    // ১. AudioContext তৈরি ও সক্রিয় করার নিরাপদ ফাংশন
+    function getAudioContext() {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                audioCtx = new AudioContextClass();
+            }
+        }
+        // ব্রাউজার অডিও স্টেট 'suspended' থাকলে সক্রিয় করা
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
+
+    // ইউজারের যেকোনো প্রথম ক্লিকে অডিও সিস্টেম অন করে দেওয়া
+    document.addEventListener('click', () => {
+        getAudioContext();
+    }, { once: true });
+
+    // ২. সাউন্ড জেনারেটর
     function playNotificationSound(type = 'success') {
         try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
 
-            const audioCtx = new AudioContext();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
 
             oscillator.type = 'sine';
 
             if (type === 'copy') {
-                // কপি করার জন্য কিছুটা হাই-পিচ সাউন্ড
-                oscillator.frequency.setValueAtTime(900, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
-                oscillator.stop(audioCtx.currentTime + 0.12);
+                oscillator.frequency.setValueAtTime(900, ctx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+                oscillator.stop(ctx.currentTime + 0.12);
             } else {
-                // কোড জেনারেট ও পেস্টের জন্য সাউন্ড
-                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-                oscillator.stop(audioCtx.currentTime + 0.15);
+                oscillator.frequency.setValueAtTime(600, ctx.currentTime);
+                gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                oscillator.stop(ctx.currentTime + 0.15);
             }
 
             oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+            gainNode.connect(ctx.destination);
             oscillator.start();
         } catch (e) {
-            // ব্রাউজারে অডিও ব্লক থাকলে নীরব থাকবে
+            console.log("Audio playback error:", e);
         }
     }
 
-    // ১. অটো ফোকাস সাপোর্ট
+    // ৩. অটো ফোকাস সাপোর্ট
     if (secretInput) {
         secretInput.focus();
     }
@@ -63,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000);
     }
 
-    // ২. পেস্ট বাটন লজিক (অডিওসহ)
+    // ৪. পেস্ট বাটন লজিক (অডিওসহ)
     if (pasteBtn && secretInput) {
         pasteBtn.addEventListener('click', async () => {
             try {
@@ -144,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             startTokenEngineLoop();
             
-            // প্রথমবার সফলভাবে কোড দেখানোর সময় সাউন্ড প্লে হবে
             if (otpDisplaySection.classList.contains('hidden')) {
                 playNotificationSound('success');
             }
@@ -198,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ৩. কপি করার জন্য Toast Notification & Sound
+    // ৫. কপি করার জন্য Toast Notification & Sound
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
             const pureToken = otpDigits.textContent.replace(/\s+/g, '');
