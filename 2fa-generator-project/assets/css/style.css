@@ -159,9 +159,10 @@ body {
     align-items: center;
 }
 
+/* ২ টি অ্যাকশন বাটন বসানোর জন্য ডানপাশের প্যাডিং বাড়িয়ে ৫.৫rem করা হয়েছে */
 .input-wrapper input {
     width: 100%;
-    padding: 1rem 3.5rem 1rem 1rem;
+    padding: 1rem 5.5rem 1rem 1rem;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
     border-radius: 12px;
@@ -179,13 +180,24 @@ body {
 
 .action-btn {
     position: absolute;
-    right: 0.75rem;
     background: transparent;
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
     padding: 0.25rem;
     transition: color var(--transition-speed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Paste এবং Scan বাটন দুটোকে পাশাপাশি সুন্দর পজিশনে রাখার স্টাইল */
+#pasteBtn {
+    right: 2.8rem;
+}
+
+#scanBtn {
+    right: 0.75rem;
 }
 
 .action-btn:hover { color: var(--accent-color); }
@@ -270,6 +282,32 @@ body {
 }
 
 .hidden { display: none !important; }
+
+/* Toast Notification UI & Animation */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(16, 185, 129, 0.95);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 1;
+}
+
+.toast.hidden {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+    pointer-events: none;
+}
 
 .modal {
     position: fixed;
