@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
     const secretInput = document.getElementById('secretInput');
+    secretInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\s+/g, '').toUpperCase();
+});
     const otpDisplaySection = document.getElementById('otpDisplaySection');
     const otpDigits = document.getElementById('otpDigits');
     const copyBtn = document.getElementById('copyBtn');
