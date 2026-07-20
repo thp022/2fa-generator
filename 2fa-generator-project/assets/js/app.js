@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('themeToggle');
     const secretInput = document.getElementById('secretInput');
+    const pasteBtn = document.getElementById('pasteBtn');
+    const toast = document.getElementById('toast');
     const otpDisplaySection = document.getElementById('otpDisplaySection');
     const otpDigits = document.getElementById('otpDigits');
     const copyBtn = document.getElementById('copyBtn');
@@ -11,6 +13,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let totpInstance = null;
     let refreshInterval = null;
+
+    // ১. অটো ফোকাস সাপোর্ট
+    if (secretInput) {
+        secretInput.focus();
+    }
+
+    // টোস্ট নোটিফিকেশন প্রদর্শন
+    function showToast(message) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 2000);
+    }
+
+    // ২. পেস্ট বাটন লজিক (নিরাপদ ও নির্ভরযোগ্য)
+    if (pasteBtn && secretInput) {
+        pasteBtn.addEventListener('click', async () => {
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    const text = await navigator.clipboard.readText();
+                    if (text) {
+                        secretInput.value = text;
+                        secretInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        showToast("Pasted from Clipboard! 📋");
+                        return;
+                    }
+                }
+                throw new Error("Fallback required");
+            } catch (err) {
+                try {
+                    secretInput.focus();
+                    const text = await navigator.clipboard.readText();
+                    if (text) {
+                        secretInput.value = text;
+                        secretInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        showToast("Pasted from Clipboard! 📋");
+                    } else {
+                        showToast("Clipboard is empty!");
+                    }
+                } catch (fallbackErr) {
+                    showToast("Please allow clipboard access or press Ctrl+V");
+                }
+            }
+        });
+    }
 
     const systemDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (!systemDarkTheme) {
@@ -38,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let secret = value.trim();
 
-            // যদি otpauth:// দিয়ে শুরু না হয়, তবে স্পেস মুছে ফেলবে এবং Uppercase করবে
             if (!secret.toLowerCase().startsWith('otpauth://')) {
                 secret = secret.replace(/\s+/g, '').toUpperCase();
             } else {
@@ -97,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
         secretInput.addEventListener('input', (e) => {
             let originalValue = e.target.value;
             
-            // ইনপুট বক্সে যদি সাধারণ সিক্রেট কী দেওয়া হয়, ইনপুট ফিল্ড থেকেও সাথে সাথে স্পেস গায়েব হবে
             if (!originalValue.toLowerCase().startsWith('otpauth://')) {
                 let cleanedInput = originalValue.replace(/\s+/g, '').toUpperCase();
                 if (originalValue !== cleanedInput) {
@@ -109,12 +156,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ৩. কপি করার জন্য Toast Notification
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
             const pureToken = otpDigits.textContent.replace(/\s+/g, '');
             navigator.clipboard.writeText(pureToken).then(() => {
-                copyTooltip.textContent = "Copied!";
-                setTimeout(() => { copyTooltip.textContent = "Copy"; }, 2000);
+                if (copyTooltip) copyTooltip.textContent = "Copied!";
+                showToast("Copied to Clipboard! 🚀");
+                setTimeout(() => { if (copyTooltip) copyTooltip.textContent = "Copy"; }, 2000);
             }).catch(() => {
                 const fallbackArea = document.createElement('textarea');
                 fallbackArea.value = pureToken;
@@ -122,8 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 fallbackArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(fallbackArea);
-                copyTooltip.textContent = "Copied!";
-                setTimeout(() => { copyTooltip.textContent = "Copy"; }, 2000);
+                if (copyTooltip) copyTooltip.textContent = "Copied!";
+                showToast("Copied to Clipboard! 🚀");
+                setTimeout(() => { if (copyTooltip) copyTooltip.textContent = "Copy"; }, 2000);
             });
         });
     }
