@@ -14,25 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let totpInstance = null;
     let refreshInterval = null;
 
-    // ১০০% গ্যারান্টিড শর্ট পপ/ক্লিক সাউন্ড (Base64 MP3 Data)
-    const notificationAudio = new Audio('data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//vkUDAAAAAAAB3AAAAAAAAPD8AAB40AAAAYAAAACgAC4EAA4AAAAD8f5mZAAAAMAP/8A//wA//wMAAAAAC38D8f8PAAAAAAD/8AAAAAD/8AA//wMAAAAAD/8A');
-
-    // সাউন্ড প্লে করার ফাংশন
-    function playNotificationSound() {
-        try {
-            notificationAudio.currentTime = 0; // প্রতিবার শুরু থেকে বাজবে
-            notificationAudio.volume = 0.4;     // ভলিউম ৪০%
-            const playPromise = notificationAudio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("Audio play prevented by browser policy");
-                });
-            }
-        } catch (e) {
-            console.log("Audio error:", e);
-        }
-    }
-
     // ১. অটো ফোকাস সাপোর্ট
     if (secretInput) {
         secretInput.focus();
@@ -48,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000);
     }
 
-    // ২. পেস্ট বাটন লজিক (অডিওসহ)
+    // ২. পেস্ট বাটন লজিক (নিরাপদ ও নির্ভরযোগ্য)
     if (pasteBtn && secretInput) {
         pasteBtn.addEventListener('click', async () => {
             try {
@@ -58,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         secretInput.value = text;
                         secretInput.dispatchEvent(new Event('input', { bubbles: true }));
                         showToast("Pasted from Clipboard! 📋");
-                        playNotificationSound();
                         return;
                     }
                 }
@@ -71,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         secretInput.value = text;
                         secretInput.dispatchEvent(new Event('input', { bubbles: true }));
                         showToast("Pasted from Clipboard! 📋");
-                        playNotificationSound();
                     } else {
                         showToast("Clipboard is empty!");
                     }
@@ -128,12 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             startTokenEngineLoop();
-            
-            // প্রথমবার সফলভাবে কোড দেখার সময় সাউন্ড হবে
-            if (otpDisplaySection.classList.contains('hidden')) {
-                playNotificationSound();
-            }
-            
             otpDisplaySection.classList.remove('hidden');
 
         } catch (error) {
@@ -183,14 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ৩. কপি করার জন্য Toast Notification & Sound
+    // ৩. কপি করার জন্য Toast Notification
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
             const pureToken = otpDigits.textContent.replace(/\s+/g, '');
             navigator.clipboard.writeText(pureToken).then(() => {
                 if (copyTooltip) copyTooltip.textContent = "Copied!";
                 showToast("Copied to Clipboard! 🚀");
-                playNotificationSound();
                 setTimeout(() => { if (copyTooltip) copyTooltip.textContent = "Copy"; }, 2000);
             }).catch(() => {
                 const fallbackArea = document.createElement('textarea');
@@ -201,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.removeChild(fallbackArea);
                 if (copyTooltip) copyTooltip.textContent = "Copied!";
                 showToast("Copied to Clipboard! 🚀");
-                playNotificationSound();
                 setTimeout(() => { if (copyTooltip) copyTooltip.textContent = "Copy"; }, 2000);
             });
         });
